@@ -1,0 +1,361 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Dashboard</title>
+
+    <!--  jQuery  -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <!-- Bootstrap 4.0 -->
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" integrity="sha384-feJI7QwhOS+hwpX2zkaeJQjeiwlhOP+SdQDqhgvvo1DsjtiSQByFdThsxO669S2D" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap Data Tables -->
+    <link rel="stylesheet" src="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Scripts -->
+    <script src="/assets/js/sorttable.js"></script>
+    <script src="assets/js/restful.js"></script>
+    <script src="assets/js/sha512.js"></script>
+    <script src="assets/js/user.js"></script>
+    <script src="assets/js/status.js"></script>
+    <script src="assets/js/level.js"></script>
+    <script src="assets/js/log.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script>
+      /*  Functions to open a modal  */
+      /*  Open Modal: Create User  */
+      function dashboardOpenModalCreate() {
+        $("#dashboardUserCreate").modal("show");
+      }
+
+      /*  Open Modal: Update User   */
+      function dashboardOpenModalUpdate(id) {
+        User.getById(id, function (obj) {
+          $('#dashboardUpdateUserSave').data('id', id);
+          $("#dashboardUpdateAccountUsername").val(obj["username"]);
+          $("#dashboardUpdateAccountRealname").val(obj["realname"]);
+          $("#dashboardUpdateAccountEMail").val(obj["email"]);
+          $("#dashboardUpdateAccountLevel").val(obj["level"]["id"]);
+          $("#dashboardUpdateAccountStatus").val(obj["status"]["id"]);
+          $("#dashboardUpdateUser").modal("show");
+        });
+      }
+
+      /*  Open Modal: Change Password, Close Modal: Update User  */
+      function dashboardUpdateShowModalChangePassword() {
+        $("#dashboardUpdateUser").modal('hide');
+        $("#dashboardUpdatePassword").modal('show');
+      }
+
+      /*  Functions to save the data in the modals  */
+      /*  Save Modal: Create User  */
+      function dashboardCreateUserSave() {
+        var username = $("#dashboardCreateAccountUsername").val();
+        var realname = $("#dashboardCreateAccountRealname").val();
+        var email = $("#dashboardCreateAccountEMail").val();
+        var level = $("#dashboardCreateAccountLevel").val();
+        var status = $("#dashboardCreateAccountStatus").val();
+        var password = $("#dashboardCreateAccountPassword").val();
+        if (username === "" || level === "" || status === "" || password === "") {
+          $("#dashboardCreateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Fill out all fields, please!</div>');
+        } else {
+          User.create(username, realname, email, password, level, status, function (obj) {
+            if(!obj.hasOwnProperty('error')) {
+              if (obj["successful"]) {
+                $("#dashboardUserCreate").modal('hide');
+                location.reload();
+              }
+            } else {
+              if (obj["error"] === "permission denied") {
+                window.location = "index.html";
+              } else if (obj["error"] === "username already exists") {
+                $("#dashboardCreateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Username already in use!</div>');
+              } else {
+                $("#dashboardCreateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error, try again later!</div>');
+              }
+            }
+          });
+        }
+      }
+
+      /*  Save Modal: Updated User  */ //TODO not working
+      function dashboardUpdateUserSave() {
+        var id = $('#dashboardUpdateUserSave').data('id');
+        var realname = $("#dashboardUpdateAccountRealname").val();
+        var email = $("#dashboardUpdateAccountEMail").val();
+        var level = $("#dashboardUpdateAccountLevel").val();
+        var status = $("#dashboardUpdateAccountStatus").val();
+        User.updateById(id, realname, email, level, status, function (obj) {
+          if(!obj.hasOwnProperty('error')) {
+            if (obj["successful"]) {
+              $("#dashboardUpdateUser").modal('hide');
+              location.reload();
+            }
+          } else {
+            if (obj["error"] === "permission denied") {
+              window.location = "index.html";
+            } else {
+              $("#dashboardUpdateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error, try again later!</div>');
+            }
+          }
+        });
+      }
+
+      /*  Save Modal: Update Password  */
+      function dashboardUpdatePasswordSave() {
+        var id = $('#dashboardUpdateUserSave').data('id');
+        var password = $("#dashboardUpdateAccountPassword").val();
+        var password2 = $("#dashboardUpdateAccountPasswordAgain").val();
+        if (password === password2) {
+          User.updatePasswordById(id, password, function (obj) {
+            if(!obj.hasOwnProperty('error')) {
+              if (obj["successful"]) {
+                //TODO @Marcel: change to css alert
+                alert("Password has been changed!");
+                $("#dashboardUpdateAccountPassword").val("");
+                $("#dashboardUpdateAccountPasswordAgain").val("");
+                $("#dashboardUpdatePassword").modal('hide');
+              }
+            } else {
+              if (obj["error"] === "permission denied") {
+                window.location = "index.html";
+              } else {
+                $("#dashboardUpdatePasswordError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error, try again later!</div>');
+              }
+            }
+          });
+        } else {
+          $("#dashboardUpdatePasswordError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> The entered passwords are not the same!</div>');
+        }
+      }
+
+      function dashboardUserDeleteFunction(id) {
+        $('#dashboardDeleteUserDelete').data('id', id);
+        User.getById(id, function(obj) {
+          $("#dashboardDeleteUserError").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the User: ' + obj["realname"] + '?</div></div>');
+        });
+        $("#dashboardDeleteUser").modal("show");
+      }
+
+      function dashboardDeleteUser() {
+        var id = $('#dashboardDeleteUserDelete').data('id');
+        User.delete(id, function(obj) {
+          if(!obj.hasOwnProperty('error')) {
+            if (obj["successful"]) {
+              location.reload();
+            }
+          } else {
+            if (obj["error"] === "permission denied") {
+              window.location = "index.html";
+            } else if (obj["error"] === "id not found") {
+              $("#dashboardDeleteUserError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
+            } else {
+              $("#dashboardDeleteUserError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
+            }
+          }
+        });
+      }
+
+      User.isTokenValid(function(response) {
+        if (response) {
+          User.getAll();
+          Status.getAll(function (response) {
+            for (var obj in response) {
+              $("#dashboardCreateAccountStatus").append('<option value="' + response[obj]["id"] + '">' + response[obj]["name"] + '</option>');
+            }
+          });
+          Level.getAll(function (response) {
+            for (var obj in response) {
+              $("#dashboardCreateAccountLevel").append('<option value="' + response[obj]["id"] + '">' + response[obj]["name"] + '</option>');
+            }
+          });
+          Status.getAll(function (response) {
+            for (var obj in response) {
+              $("#dashboardUpdateAccountStatus").append('<option value="' + response[obj]["id"] + '">' + response[obj]["name"] + '</option>');
+            }
+          });
+          Level.getAll(function (response) {
+            for (var obj in response) {
+              $("#dashboardUpdateAccountLevel").append('<option value="' + response[obj]["id"] + '">' + response[obj]["name"] + '</option>');
+            }
+          });
+        } else {
+          window.location = host + "index.html";
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="nav"></div>
+		<script>
+		$.get("navigation.html", function(data){
+	    $("#nav").replaceWith(data);
+		});
+    </script>
+    <table id="viewUserTable" class="table sortable table-bordered">
+      <thead>
+      	<tr>
+          <th>Username</th>
+          <th>Real Name</th>
+          <th>E-Mail</th>
+          <th>Created</th>
+          <th>Last Login</th>
+          <th>Level</th>
+          <th>Status</th>
+          <th class="sorttable_nosort"></th>
+          <th class="sorttable_nosort"><a data-toggle="modal" onclick="dashboardOpenModalCreate()"><span class="fa fa-user-plus"/></a></th>
+      	</tr>
+      </thead>
+      <tbody id="users">
+      </tbody>
+    </table>
+  </body>
+
+  <!-- Modal: Create User -->
+  <div class="modal fade" id="dashboardUserCreate">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Create a new User Account</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="dashboardCreateUserError"></div>
+          <table cellspacing="1">
+            <tbody>
+              <tr>
+                <td><p>Username: </p></td>
+                <td><input type="text" id="dashboardCreateAccountUsername" /></td>
+              </tr>
+              <tr>
+                <td><p>Realname: </p></td>
+                <td><input type="text" id="dashboardCreateAccountRealname" /></td>
+              </tr>
+              <tr>
+                <td><p>E-Mail: </p></td>
+                <td><input type="email" id="dashboardCreateAccountEMail" /></td>
+              </tr>
+              <tr>
+                <td><p>Permissionlevel: </p></td>
+                <td><select id="dashboardCreateAccountLevel"></select></td>
+              </tr>
+              <tr>
+                <td><p>Status: </p></td>
+                <td><select id="dashboardCreateAccountStatus"></select></td>
+              </tr>
+              <tr>
+                <td><p>Password: </p></td>
+                <td><input type="password" id="dashboardCreateAccountPassword" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="dashboardCreateUserSave()">Create Account</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Update User -->
+  <div class="modal fade" id="dashboardUpdateUser">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Edit an existing User Account</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="dashboardUpdateUserError"></div>
+          <table cellspacing="1">
+            <tbody>
+              <tr>
+                <td><p>Username: </p></td>
+                <td><input type="text" id="dashboardUpdateAccountUsername" disabled/></td>
+              </tr>
+              <tr>
+                <td><p>Realname: </p></td>
+                <td><input type="text" id="dashboardUpdateAccountRealname" /></td>
+              </tr>
+              <tr>
+                <td><p>E-Mail: </p></td>
+                <td><input type="email" id="dashboardUpdateAccountEMail" /></td>
+              </tr>
+              <tr>
+                <td><p>Level: </p></td>
+                <td><select id="dashboardUpdateAccountLevel"></select></td>
+              </tr>
+              <tr>
+                <td><p>Status: </p></td>
+                <td><select id="dashboardUpdateAccountStatus"></select></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="dashboardUpdateShowModalChangePassword()">Open Change Password Modal</button>
+          <button type="button" class="btn btn-primary" id="dashboardUpdateUserSave" onclick="dashboardUpdateUserSave()">Update Account</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Update Password -->
+  <div class="modal fade" id="dashboardUpdatePassword">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Change Password</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="dashboardUpdatePasswordError"></div>
+          <table cellspacing="1">
+            <tbody>
+              <tr>
+                <td><p>Password: </p></td>
+                <td><input type="password" id="dashboardUpdateAccountPassword" /></td>
+              </tr>
+              <tr>
+                <td><p>Password (again): </p></td>
+                <td><input type="password" id="dashboardUpdateAccountPasswordAgain" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="dashboardUpdatePasswordSave()">Change Password</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Delete User -->
+  <div class="modal fade" id="dashboardDeleteUser">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Delete Status</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="dashboardDeleteUserError"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="dashboardDeleteUserDelete" onclick="dashboardDeleteUser()">Delete</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</html>

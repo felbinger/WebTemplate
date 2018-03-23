@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Template Login</title>
+
+		<!--  jQuery  -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+		<!-- Bootstrap 4.0 -->
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" integrity="sha384-feJI7QwhOS+hwpX2zkaeJQjeiwlhOP+SdQDqhgvvo1DsjtiSQByFdThsxO669S2D" crossorigin="anonymous"></script>
+
+		<!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+		<!-- Scripts -->
+		<script src="assets/js/restful.js"></script>
+    <script src="assets/js/sha512.js"></script>
+    <script src="assets/js/user.js"></script>
+    <script src="assets/js/log.js"></script>
+    <script src="assets/js/level.js"></script>
+    <script src="assets/js/status.js"></script>
+    <script src="assets/js/config.js"></script>
+		<style>
+			@charset "utf-8";
+
+			*{
+				margin:0;
+				padding:0;
+			}
+			#login-form {
+				margin:5% auto;
+				max-width:500px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="nav"></div>
+		<script>
+		$.get("navigation.html", function(data){
+	    $("#nav").replaceWith(data);
+		});
+    </script>
+		<div class="container">
+			<div id="login-form">
+				<div class="col-md-12">
+					<div class="form-group">
+						<h2 align="center">Login</h2>
+					</div>
+					<div class="form-group">
+						<hr/>
+					</div>
+					<div id="login_error"></div>
+					<div class="form-group">
+						<div class="input-group">
+							<input type="text" id="login_username" class="form-control" placeholder="Username" maxlength="120" required/>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="input-group">
+							<input type="password" id="login_password" class="form-control" placeholder="Password" maxlength="120" required/>
+						</div>
+					</div>
+					<div class="form-group">
+						<hr />
+					</div>
+					<div class="form-group">
+						<button class="btn btn-block btn-primary" onclick="User.login($('#login_username').val(), $('#login_password').val())">Login</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

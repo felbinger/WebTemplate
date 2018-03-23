@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Config</title>
+
+    <!--  jQuery  -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <!-- Bootstrap 4.0 -->
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" integrity="sha384-feJI7QwhOS+hwpX2zkaeJQjeiwlhOP+SdQDqhgvvo1DsjtiSQByFdThsxO669S2D" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap Data Tables -->
+    <link rel="stylesheet" src="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Scripts -->
+    <script src="assets/js/restful.js"></script>
+    <script src="assets/js/sha512.js"></script>
+    <script src="assets/js/user.js"></script>
+    <script src="assets/js/log.js"></script>
+    <script src="assets/js/level.js"></script>
+    <script src="assets/js/status.js"></script>
+    <script src="assets/js/config.js"></script>
+  </head>
+  <body>
+    <div id="nav"></div>
+		<script>
+		$.get("navigation.html", function(data){
+	    $("#nav").replaceWith(data);
+		});
+    </script>
+    <h4>@Marcel: redesign</h4>
+    <div class="card">
+      <div class="card-body">
+        <h4>@Marcel: <a href="https://codepen.io/jenniferlouie/full/vEVMwe">Toggles Button</a></h4>
+        <table cellspacing="1">
+          <tbody>
+            <tr>
+              <td>Registration:</td>
+              <td><input type="checkbox" id="configCheckboxRegistration"/></td>
+            </tr>
+            <tr>
+              <td>Logging:</td>
+              <td><input type="checkbox" id="configCheckboxLogging"/></td>
+            </tr>
+            <tr>
+              <td>Session Validity: (in Minutes)</td>
+              <td><input type="number" id="configInputSessionValidity"></td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" onclick="configSave()">Save</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <!-- TODO -->
+        <h4>@Nico: Delete Level: Check if level is in use (any user who has the level), if the level is in use - show error</h4>
+        <table id="viewLevelTable" class="table sortable table-bordered">
+          <thead>
+          	<tr>
+              <th>Level ID</th>
+              <th>Level Name</th>
+              <th></th>
+              <th class="sorttable_nosort"><a data-toggle="modal" href="#configModalCreateLevel"><span class="fa fa-plus"/></a></th>
+          	</tr>
+          </thead>
+          <tbody id="levels">
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <!-- TODO -->
+        <h4>@Nico: Delete Status: Check if status is in use (any user who has the status), if the status is in use - show error</h4>
+        <table id="viewStatusTable" class="table sortable table-bordered">
+          <thead>
+          	<tr>
+              <th>Status ID</th>
+              <th>Status Name</th>
+              <th></th>
+              <th class="sorttable_nosort"><a data-toggle="modal" href="#configModalCreateStatus"><span class="fa fa-plus"/></a></th>
+          	</tr>
+          </thead>
+          <tbody id="status">
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      /*  Basic Settings  */
+      function save_basicConfig() {
+        User.setRegistration($("#configCheckboxRegistration").prop("checked"));
+        Log.setLogging($("#configCheckboxLogging").prop("checked"));
+        Config.setSessionValidity($("#configInputSessionValidity").val());
+      }
+
+      /*  Level  */
+      function openModal_updateLevel(id) {
+        Level.getById(id, function(obj) {
+          $('#save_modalUpdateLevel').data('id', id);
+          $("#configUpdateLevelName").val(obj["name"]);
+          $("#configModalUpdateLevel").modal("show");
+        });
+      }
+
+      function openModal_deleteLevel(id) {
+        $('#save_modalDeleteLevel').data('id', id);
+        Level.getById(id, function(obj) {
+          $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Level: ' + obj["name"] + '?</div></div>');
+        });
+        $("#configModalDeleteLevel").modal("show");
+      }
+
+      function save_modalCreateLevel() {
+        var name = $('#configCreateLevelName').val();
+        if (name !== "") {
+          Level.create(name, function(obj) {
+            if(!obj.hasOwnProperty('error')) {
+              $('#configModalCreateLevel').modal('hide');
+              location.reload();
+            } else if (obj["error"] === "levelname already exists") {
+              $("#configCreateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Level name already exists</div></div>');
+            } else {
+              $("#configCreateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error</div></div>');
+            }
+          });
+        } else {
+          $("#configCreateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Name can\'t be emtpy!</div></div>');
+        }
+      }
+
+      function save_modalUpdateLevel() {
+        var id = $('#save_modalUpdateLevel').data('id');
+        var name = $('#configUpdateLevelName').val();
+        if (name !== "") {
+          Level.updateById(id, name, function(obj) {
+            if(!obj.hasOwnProperty('error')) {
+              $('#configModalUpdateLevel').modal('hide');
+              location.reload();
+            } else {
+              $("#configUpdateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error</div></div>');
+            }
+          });
+        } else {
+          $("#configUpdateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Name can\'t be emtpy!</div></div>');
+        }
+      }
+
+      function deleteLevel() {
+        var id = $('#save_modalDeleteLevel').data('id');
+        Level.delete(id, function(obj) {
+          if(!obj.hasOwnProperty('error')) {
+            if (obj["successful"]) {
+              location.reload();
+            }
+          } else {
+            if (obj["error"] === "permission denied") {
+              window.location = "index.html";
+            } else if (obj["error"] === "id not found") {
+              $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
+            } else {
+              $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
+            }
+          }
+        });
+      }
+
+      /*  Status  */
+      function openModal_updateStatus(id) {
+        Status.getById(id, function(obj) {
+          $('#save_modalUpdateStatus').data('id', id);
+          $("#configUpdateStatusName").val(obj["name"]);
+          $("#configModalUpdateStatus").modal("show");
+        });
+      }
+
+      function openModal_deleteStatus(id) {
+        $('#save_modalDeleteStatus').data('id', id);
+        Status.getById(id, function(obj) {
+          $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Status: ' + obj["name"] + '?</div></div>');
+        });
+        $("#configModalDeleteStatus").modal("show");
+      }
+
+      function save_modalCreateStatus() {
+        var name = $('#configCreateStatusName').val();
+        if (name !== "") {
+          Status.create(name, function(obj) {
+            if(!obj.hasOwnProperty('error')) {
+              $('#configModalCreateStatus').modal('hide');
+              location.reload();
+            } else if (obj["error"] === "statusname already exists") {
+              $("#configCreateStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Status name already exists</div></div>');
+            } else {
+              $("#configCreateStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error</div></div>');
+            }
+          });
+        } else {
+          $("#configCreateStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Name can\'t be emtpy!</div></div>');
+        }
+      }
+
+      function save_modalUpdateStatus() {
+        var id = $('#save_modalUpdateStatus').data('id');
+        var name = $('#configUpdateStatusName').val();
+        if (name !== "") {
+          Status.updateById(id, name, function(obj) {
+            if(!obj.hasOwnProperty('error')) {
+              $('#configModalUpdateLevel').modal('hide');
+              location.reload();
+            } else {
+              $("#configUpdateStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error</div></div>');
+            }
+          });
+        } else {
+          $("#configUpdateStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Name can\'t be emtpy!</div></div>');
+        }
+      }
+
+      function deleteStatus() {
+        var id = $('#save_modalDeleteStatus').data('id');
+        Status.delete(id, function(obj) {
+          if(!obj.hasOwnProperty('error')) {
+            if (obj["successful"]) {
+              location.reload();
+            }
+          } else {
+            if (obj["error"] === "permission denied") {
+              window.location = "index.html";
+            } else if (obj["error"] === "id not found") {
+              $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
+            } else {
+              $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
+            }
+          }
+        });
+      }
+
+      User.get(function(obj) {
+        if (obj["level"]["id"] == 0) {
+          User.isRegistrationEnabled(function (enabled){
+            $("#configCheckboxRegistration").prop("checked", enabled);
+          });
+          Log.isLoggingEnabled(function (enabled){
+            $("#configCheckboxLogging").prop("checked", enabled);
+          });
+          Config.getSessionValidity(function (validity) {
+            $("#configInputSessionValidity").val(validity);
+          });
+          Status.getAll(function (response) {
+            if(!response.hasOwnProperty('error')) {
+              for (var obj in response) {
+                $('#status').append("<tr>" +
+                                   "<td>" + response[obj]["id"] + "</td>" +
+                                   "<td>" + response[obj]["name"] + "</td>" +
+                                   "<td>" + '<a onclick="openModal_updateStatus(' + response[obj]["id"] + ')"><span class="fa fa-gear"/></a>' + "</td>" +
+                                   "<td>" + '<a onclick="openModal_deleteStatus(' + response[obj]["id"] + ')"><span class="fa fa-trash-o"/></a>' +"</td>" +
+                                   "</tr>");
+              }
+              $('#viewStatusTable').DataTable();
+            }
+          });
+          Level.getAll(function (response) {
+            if(!response.hasOwnProperty('error')) {
+              for (var obj in response) {
+                $('#levels').append("<tr>" +
+                                   "<td>" + response[obj]["id"] + "</td>" +
+                                   "<td>" + response[obj]["name"] + "</td>" +
+                                   "<td>" + '<a onclick="openModal_updateLevel(' + response[obj]["id"] + ')"><span class="fa fa-gear"/></a>' + "</td>" +
+                                   "<td>" + '<a onclick="openModal_deleteLevel(' + response[obj]["id"] + ')"><span class="fa fa-trash-o"/></a>' +"</td>" +
+                                   "</tr>");
+              }
+              $('#viewLevelTable').DataTable();
+            }
+          });
+        } else {
+          location.window = "index.html";
+        }
+      });
+    </script>
+  </body>
+
+  <!-- Modal: Create Level -->
+  <div class="modal fade" id="configModalCreateLevel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Create Level</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="configCreateLevelError"></div>
+          <table cellspacing="1">
+            <tbody>
+              <tr>
+                <td><p>Name: </p></td>
+                <td><input type="text" id="configCreateLevelName" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="save_modalCreateLevel()">Create Level</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Update Level -->
+  <div class="modal fade" id="configModalUpdateLevel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Update Level</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="configUpdateLevelError"></div>
+          <table cellspacing="1">
+            <tbody>
+              <tr>
+                <td><p>Name: </p></td>
+                <td><input type="text" id="configUpdateLevelName" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="save_modalUpdateLevel" onclick="save_modalUpdateLevel()">Save</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Delete Status -->
+  <div class="modal fade" id="configModalDeleteLevel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Delete Level</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="configDeleteLevelError"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="save_modalDeleteLevel" onclick="deleteLevel()">Delete</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create Status -->
+  <div class="modal fade" id="configModalCreateStatus">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Create Status</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="configCreateStatusError"></div>
+          <table cellspacing="1">
+            <tbody>
+              <tr>
+                <td><p>Name: </p></td>
+                <td><input type="text" id="configCreateStatusName" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="save_modalCreateStatus()">Save</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Update Status -->
+  <div class="modal fade" id="configModalUpdateStatus">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Update Status</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="configUpdateStatusError"></div>
+          <table cellspacing="1">
+            <tbody>
+              <tr>
+                <td><p>Name: </p></td>
+                <td><input type="text" id="configUpdateStatusName" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="save_modalUpdateStatus" onclick="save_modalUpdateStatus()">Save</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Delete Status -->
+  <div class="modal fade" id="configModalDeleteStatus">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Delete Status</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div id="configDeleteStatusError"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="save_modalDeleteStatus" onclick="deleteStatus()">Delete</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</head>
