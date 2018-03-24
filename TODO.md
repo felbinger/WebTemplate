@@ -1,6 +1,6 @@
 # Todo
 ## @Marcel:
-### Redesign of the following pages:###
+### Redesign of the following pages:
 - [ ] navigation.html
 - [ ] index.html
 - [ ] login.html
