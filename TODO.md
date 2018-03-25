@@ -11,7 +11,7 @@
 
 ## @Nico:
 ### config.html:
-- [ ] Check if status/level is in use - if yes show an error message
+- [x] Check if status/level is in use - if yes show an error message
 
 ### logs.html
 - [ ] error statistics in diagrams
@@ -20,3 +20,11 @@
 
 ### main.php
 - [ ] automatically database table generation - currently not working
+
+### internal message system
+
+### e-mail connection for
+- [ ] e-mail verification on registration (can be global disabled in config.html)
+- [ ] login notification (can be disabled by each user in settings.html)
+- [ ] new message notification (can be disabled by each user in settings.html)
+- [ ] Two Factor Authentication (via Google Authentication or PGP)

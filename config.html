@@ -61,8 +61,6 @@
     </div>
     <div class="card">
       <div class="card-body">
-        <!-- TODO -->
-        <h4>@Nico: Delete Level: Check if level is in use (any user who has the level), if the level is in use - show error</h4>
         <table id="viewLevelTable" class="table sortable table-bordered">
           <thead>
           	<tr>
@@ -79,8 +77,6 @@
     </div>
     <div class="card">
       <div class="card-body">
-        <!-- TODO -->
-        <h4>@Nico: Delete Status: Check if status is in use (any user who has the status), if the status is in use - show error</h4>
         <table id="viewStatusTable" class="table sortable table-bordered">
           <thead>
           	<tr>
@@ -115,7 +111,7 @@
       function openModal_deleteLevel(id) {
         $('#save_modalDeleteLevel').data('id', id);
         Level.getById(id, function(obj) {
-          $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Level: ' + obj["name"] + '?</div></div>');
+          $("#configDeleteLevelMsg").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Level: ' + obj["name"] + '?</div></div>');
         });
         $("#configModalDeleteLevel").modal("show");
       }
@@ -167,6 +163,12 @@
               window.location = "index.html";
             } else if (obj["error"] === "id not found") {
               $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
+            } else if (obj.error.hasOwnProperty("level is in use")) {
+              $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> The Level is in use by the following Users:</div></div>');
+              $("#configDeleteLevelError").append('<table class="table sortable table-bordered"><thead><tr><th>Username</th><th>E-Mail</th><th>Real Name</th></tr></thead><tbody id="configDeleteLevelErrorUsers"></tbody></table>');
+              for (var i in obj["error"]["level is in use"]) {
+                $("#configDeleteLevelErrorUsers").append('<tr><td>' + obj["error"]["level is in use"][i]["username"] + '</td><td>' + obj["error"]["level is in use"][i]["email"] + '</td><td>' + obj["error"]["level is in use"][i]["realname"] + '</td></tr>')
+              }
             } else {
               $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
             }
@@ -186,7 +188,7 @@
       function openModal_deleteStatus(id) {
         $('#save_modalDeleteStatus').data('id', id);
         Status.getById(id, function(obj) {
-          $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Status: ' + obj["name"] + '?</div></div>');
+          $("#configDeleteStatusMsg").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Status: ' + obj["name"] + '?</div></div>');
         });
         $("#configModalDeleteStatus").modal("show");
       }
@@ -238,6 +240,12 @@
               window.location = "index.html";
             } else if (obj["error"] === "id not found") {
               $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
+            } else if (obj.error.hasOwnProperty("status is in use")) {
+              $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> The Status is in use by the following Users:</div></div>');
+              $("#configDeleteStatusError").append('<table class="table sortable table-bordered"><thead><tr><th>Username</th><th>E-Mail</th><th>Real Name</th></tr></thead><tbody id="configDeleteStatusErrorUsers"></tbody></table>');
+              for (var i in obj["error"]["status is in use"]) {
+                $("#configDeleteStatusErrorUsers").append('<tr><td>' + obj["error"]["status is in use"][i]["username"] + '</td><td>' + obj["error"]["status is in use"][i]["email"] + '</td><td>' + obj["error"]["status is in use"][i]["realname"] + '</td></tr>')
+              }
             } else {
               $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
             }
@@ -352,6 +360,7 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
         <div class="modal-body">
+          <div id="configDeleteLevelMsg"></div>
           <div id="configDeleteLevelError"></div>
         </div>
         <div class="modal-footer">
@@ -425,6 +434,7 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
         <div class="modal-body">
+          <div id="configDeleteStatusMsg"></div>
           <div id="configDeleteStatusError"></div>
         </div>
         <div class="modal-footer">

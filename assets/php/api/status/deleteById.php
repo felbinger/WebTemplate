@@ -16,9 +16,20 @@
     if ($session->isValid()) {
       if($session->getUser()->isAdmin()) {
         if (Status::existById($id)) {
-          Log::create("Delete Status", "successful", $session->getUser());
-          Status::getById($id)->delete();
-          dieSuccessful();
+          //Check if any user has this Status
+          $users = array();
+          foreach (User::getAll() as $user) {
+            if (User::getById($user["id"])->getStatus()->getId() == $id) {
+              $users[] = User::getById($user["id"])->getInfos();
+            }
+          }
+          if (!count($users) > 0) {
+            Log::create("Delete Status", "successful", $session->getUser());
+            Status::getById($id)->delete();
+            dieSuccessful();
+          } else {
+            dieError(array("status is in use" => $users));
+          }
         } else {
           Log::create("Delete Status", "id " . $id . " not found", $session->getUser());
           dieError("id not found");
