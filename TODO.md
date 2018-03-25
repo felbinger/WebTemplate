@@ -27,4 +27,5 @@
 - [ ] e-mail verification on registration (can be global disabled in config.html)
 - [ ] login notification (can be disabled by each user in settings.html)
 - [ ] new message notification (can be disabled by each user in settings.html)
-- [ ] Two Factor Authentication (via Google Authentication or PGP)
+
+### Two Factor Authentication (via Google Authentication or PGP)
