@@ -16,7 +16,7 @@
     if ($session->isValid()) {
       if($session->getUser()->isAdmin()) {
         if (Status::existById($id)) {
-          //Check if any user has this Status
+          //Check if any user has this status
           $users = array();
           foreach (User::getAll() as $user) {
             if (User::getById($user["id"])->getStatus()->getId() == $id) {

@@ -17,6 +17,9 @@
     <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
 
+    <!-- Propper JS -->
+    <script src="https://unpkg.com/popper.js@1.14.1/dist/umd/popper.js"></script>
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -28,6 +31,7 @@
     <script src="assets/js/level.js"></script>
     <script src="assets/js/status.js"></script>
     <script src="assets/js/config.js"></script>
+    <script src="assets/js/message.js"></script>
   </head>
   <body>
     <div id="nav"></div>
@@ -112,6 +116,7 @@
         $('#save_modalDeleteLevel').data('id', id);
         Level.getById(id, function(obj) {
           $("#configDeleteLevelMsg").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Level: ' + obj["name"] + '?</div></div>');
+          $("#configDeleteLevelError").html('');
         });
         $("#configModalDeleteLevel").modal("show");
       }
@@ -163,6 +168,8 @@
               window.location = "index.html";
             } else if (obj["error"] === "id not found") {
               $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
+            } else if (obj["error"] === "this level is not deleteable") {
+              $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> This level can not be deleted!</div></div>');
             } else if (obj.error.hasOwnProperty("level is in use")) {
               $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> The Level is in use by the following Users:</div></div>');
               $("#configDeleteLevelError").append('<table class="table sortable table-bordered"><thead><tr><th>Username</th><th>E-Mail</th><th>Real Name</th></tr></thead><tbody id="configDeleteLevelErrorUsers"></tbody></table>');
@@ -189,6 +196,7 @@
         $('#save_modalDeleteStatus').data('id', id);
         Status.getById(id, function(obj) {
           $("#configDeleteStatusMsg").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Status: ' + obj["name"] + '?</div></div>');
+          $("#configDeleteStatusError").html('');
         });
         $("#configModalDeleteStatus").modal("show");
       }

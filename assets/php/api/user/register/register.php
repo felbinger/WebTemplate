@@ -14,8 +14,14 @@
       $email = htmlspecialchars(strip_tags(trim($_POST['email'])));
       $password = htmlspecialchars(strip_tags(trim($_POST['password'])));
       if(!User::existByName($username)) {
-        User::create($username, $realname, $email, $password, 0, 0);
-        Log::create("Created User", "successful", User::getByName($username));
+        $user = User::create($username, $realname, $email, $password, 1, 1);
+        Log::create("Created User", "successful", $user);
+        if ($config["emailVerification"]) {
+          //TODO Send email with verificationCode
+          //$message = 'Hey,\nyou can activate your account by click the link below:\nhttps://example.de/assets/php/api/user/register/verifyEmail.php?email='.$user->getEmail().'&verificationCode='.$user->getVerificationCode().'If you haven\'t sign up, please ignore this email.';
+			    //$smtp = Mail::factory('smtp', array ('host' => "ssl://strato.de", 'port' => "465", 'auth' => true, 'username' => "smtp_username", 'password' => "smtp_password"));
+		  	  //$mail = $smtp->send($user->getEmail(), array ('From' => "noreply@example.de", 'To' => $user->getEmail(), 'Subject' => "WebTemplate Mail Verification"), $message);
+        }
         dieSuccessful();
       } else {
         dieError("username already exists");

@@ -16,19 +16,23 @@
     if ($session->isValid()) {
       if($session->getUser()->isAdmin()) {
         if (Level::existById($id)) {
-          //Check if any user has this Level
-          $users = array();
-          foreach (User::getAll() as $user) {
-            if (User::getById($user["id"])->getLevel()->getId() == $id) {
-              $users[] = User::getById($user["id"])->getInfos();
-            }
-          }
-          if (!count($users) > 0) {
-            Log::create("Delete Level", "successful", $session->getUser());
-            Level::getById($id)->delete();
-            dieSuccessful();
+          if ($id == 0 || $id == 1) {
+            dieError("this level is not deleteable");
           } else {
-            dieError(array("level is in use" => $users));
+            //Check if any user has this level
+            $users = array();
+            foreach (User::getAll() as $user) {
+              if (User::getById($user["id"])->getLevel()->getId() == $id) {
+                $users[] = User::getById($user["id"])->getInfos();
+              }
+            }
+            if (!count($users) > 0) {
+              Log::create("Delete Level", "successful", $session->getUser());
+              Level::getById($id)->delete();
+              dieSuccessful();
+            } else {
+              dieError(array("level is in use" => $users));
+            }
           }
         } else {
           Log::create("Delete Level", "id " . $id . " not found", $session->getUser());

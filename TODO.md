@@ -8,6 +8,7 @@
 - [ ] settings.html
 - [ ] dashboard.html
 - [ ] settings.html
+- [ ] message.html
 
 ## @Nico:
 ### config.html:
@@ -21,7 +22,8 @@
 ### main.php
 - [ ] automatically database table generation - currently not working
 
-### internal message system
+### message.html
+- [x] internal message system
 
 ### e-mail connection for
 - [ ] e-mail verification on registration (can be global disabled in config.html)

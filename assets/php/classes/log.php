@@ -53,7 +53,7 @@
     }
 
     public static function create($api, $status, $user) {
-      if ($GLOBALS['config']['logging'] == false) {
+      if ($GLOBALS['config']['logging'] == false || is_null($user)) {
         return null;
       } else {
         if (!isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {

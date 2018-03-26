@@ -18,15 +18,23 @@
 <script>
   User.isTokenValid(function(obj) {
     if (obj) {
-      $("#navbar").append('<li class="nav-item dropdown">' +
+      /*$("#navbar").append('<li class="nav-item dropdown">' +
         '<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
-          '<span class="fa fa-user-circle"/>' +
+          '<span class="fa fa-envelope fa-fw"/>' +
         '</a>' +
-        '<div id="navbar_user_dropdown" class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">' +
-          '<a style="cursor:pointer;" class="nav-link" href="settings.html">Settings</a>' +
-          '<a style="cursor:pointer;" class="nav-link" onclick="User.logout()">Logout</a>' +
+        '<div id="navbarMessageDropdown" class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">' +
         '</div>' +
       '</li>');
+      Message.getAll(function (response) {
+        if(!response.hasOwnProperty('error')) {
+          for (var obj in response) {
+            $('#navbarMessageDropdown').append('<li><div><strong>' + response[obj]["subject"] + '</strong><span class="pull-right text-muted"><em>' + response[obj]["from"] +
+                                               '</em></span></div><div>' + response[obj]["message"] + '</div></li>' +
+                                               '<li class="divider"></li><li><li class="divider"></li><li>');
+          }
+          $('#navbarMessageDropdown').append('<a class="text-center" href="message.html"><strong>Read All Messages</strong><i class="fa fa-angle-right"></i></a></li>');
+        }
+      });*/
       User.get(function(obj) {
         if (obj["level"]["id"] == 0) {
           $("#navbar").append('<li class="nav-item dropdown">' +
@@ -40,6 +48,15 @@
           '</li>');
         }
       });
+      $("#navbar").append('<li class="nav-item dropdown">' +
+        '<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+          '<span class="fa fa-user-circle"/>' +
+        '</a>' +
+        '<div id="navbar_user_dropdown" class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">' +
+          '<a style="cursor:pointer;" class="nav-link" href="settings.html">Settings</a>' +
+          '<a style="cursor:pointer;" class="nav-link" onclick="User.logout()">Logout</a>' +
+        '</div>' +
+      '</li>');
     } else {
       $("#navbar").append('<li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>');
       User.isRegistrationEnabled(function(obj) {

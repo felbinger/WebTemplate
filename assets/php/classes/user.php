@@ -4,6 +4,8 @@
     private $username;
     private $realname;
     private $email;
+    private $verificationCode;
+    private $emailVerified;
     private $password;
     private $lastlogin;
     private $created;
@@ -11,11 +13,13 @@
     private $status; //object of class Status
 
     /*  Constructor  */
-    private function __construct($id, $username, $realname, $email, $password, $created, $lastlogin, $level, $status) {
+    private function __construct($id, $username, $realname, $email, $verificationCode, $emailVerified, $password, $created, $lastlogin, $level, $status) {
       $this->id = $id;
       $this->username = $username;
       $this->realname = $realname;
       $this->email = $email;
+      $this->verificationCode = $verificationCode;
+      $this->emailVerified = $emailVerified;
       $this->password = $password;
       $this->created = $created;
       $this->lastlogin = $lastlogin;
@@ -35,6 +39,12 @@
     }
     public function getEmail() {
       return $this->email;
+    }
+    public function getVerificationCode() {
+      return $this->verificationCode;
+    }
+    public function isEmailVerified() {
+      return $this->emailVerified;
     }
     private function getPassword() {
       return $this->password;
@@ -58,10 +68,16 @@
                    "username" => $this->getUsername(),
                    "realname" => $this->getRealname(),
                    "email" => $this->getEmail(),
+                   "emailVerified" => $this->isEmailVerified(),
                    "created" => $this->getCreated(),
                    "lastlogin" => $this->getLastlogin(),
                    "level" => $this->getLevel()->getInfos(),
                    "status" => $this->getStatus()->getInfos());
+    }
+
+    public function getMinInfos() {
+      return array("id" => $this->getId(),
+                   "realname" => $this->getRealname());
     }
 
     /*  Function to delete an existing user account.  */
@@ -104,6 +120,26 @@
       return ($this->getLevel()->getId() == 0);
     }
 
+    public function setEmailVerifiedTrue() {
+      $GLOBALS['db']->update("UPDATE user SET emailVerified = 1 WHERE id = :id", array("id" => $this->getId()));
+      $this->emailVerified = true;
+    }
+
+    public function getMyMessage() {
+      return Message::getAllFor($this);
+    }
+
+    /*  Function to generate the verificationCode for emails  */
+    public static function generateVerificationCode() {
+      $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      $charactersLength = strlen($characters);
+      $token = '';
+      for ($i = 0; $i < 32; $i++) {
+        $token .= $characters[rand(0, $charactersLength - 1)];
+      }
+      return $token;
+    }
+
     /*  Function to create new users  */
     public static function create($username, $realname, $email, $password, $level, $status) {
       /*  Check if username already exist, if yes return false   */
@@ -111,11 +147,12 @@
         $data = array("username" => $username,
                       "realname" => $realname,
                       "email" => $email,
+                      "verificationCode" => self::generateVerificationCode(),
                       "password" => $password,
                       "level" => $level,
                       "status" => $status);
-        $id = $GLOBALS['db']->update("INSERT INTO user(username, realname, email, password, level, status)
-                                      VALUES(:username, :realname, :email, :password, :level, :status)", $data);
+        $id = $GLOBALS['db']->update("INSERT INTO user(username, realname, email, verificationCode, password, level, status)
+                                      VALUES(:username, :realname, :email, :verificationCode, :password, :level, :status)", $data);
         return self::getById($id);
       } else {
         return false;
@@ -124,32 +161,56 @@
 
     /*  Get the user from the database using id  */
     public static function getById($id) {
-      $data = array("id" => $id);
-      $arr = $GLOBALS['db']->query("SELECT * FROM user WHERE id = :id", $data);
-      return new User($arr['id'],
-                      $arr['username'],
-                      $arr['realname'],
-                      $arr['email'],
-                      $arr['password'],
-                      $arr['created'],
-                      $arr['lastlogin'],
-                      Level::getById($arr['level']),
-                      Status::getById($arr['status']));
+      if (self::existById($id)) {
+        $arr = $GLOBALS['db']->query("SELECT * FROM user WHERE id = :id", array("id" => $id));
+        return new User($arr['id'],
+                        $arr['username'],
+                        $arr['realname'],
+                        $arr['email'],
+                        $arr['verificationCode'],
+                        (($arr['emailVerified'] == 0) ? false : true),
+                        $arr['password'],
+                        $arr['created'],
+                        $arr['lastlogin'],
+                        Level::getById($arr['level']),
+                        Status::getById($arr['status']));
+      }
     }
 
     /*  Get the user from the database  */
     public static function getByName($username) {
-      $data = array("username" => $username);
-      $arr = $GLOBALS['db']->query("SELECT * FROM user WHERE username = :username", $data);
-      return new User($arr['id'],
-                      $arr['username'],
-                      $arr['realname'],
-                      $arr['email'],
-                      $arr['password'],
-                      $arr['created'],
-                      $arr['lastlogin'],
-                      Level::getById($arr['level']),
-                      Status::getById($arr['status']));
+      if (self::existByName($username)) {
+        $arr = $GLOBALS['db']->query("SELECT * FROM user WHERE username = :username", array("username" => $username));
+        return new User($arr['id'],
+                        $arr['username'],
+                        $arr['realname'],
+                        $arr['email'],
+                        $arr['verificationCode'],
+                        (($arr['emailVerified'] == 0) ? false : true),
+                        $arr['password'],
+                        $arr['created'],
+                        $arr['lastlogin'],
+                        Level::getById($arr['level']),
+                        Status::getById($arr['status']));
+      }
+    }
+
+    /*  Get the user from the database  */
+    public static function getByEMail($email) {
+      if (self::existByEMail($email)) {
+        $arr = $GLOBALS['db']->query("SELECT * FROM user WHERE email = :email", array("email" => $email));
+        return new User($arr['id'],
+                        $arr['username'],
+                        $arr['realname'],
+                        $arr['email'],
+                        $arr['verificationCode'],
+                        (($arr['emailVerified'] == 0) ? false : true),
+                        $arr['password'],
+                        $arr['created'],
+                        $arr['lastlogin'],
+                        Level::getById($arr['level']),
+                        Status::getById($arr['status']));
+      }
     }
 
     /*  Check if the user account exist by id */
@@ -162,23 +223,40 @@
       return is_array($GLOBALS['db']->query("SELECT `id` FROM user WHERE username = :username", array("username" => $username)));
     }
 
+    /*  Check if the user account exist by email */
+    public static function existByEMail($email) {
+      return is_array($GLOBALS['db']->query("SELECT `id` FROM user WHERE email = :email", array("email" => $email)));
+    }
+
     /*  Verify the password of the account  */
     public static function verifyPassword($username, $password) {
       if (self::existByName($username)) {
-        $arr = $GLOBALS['db']->query("SELECT `password` FROM user WHERE username = :username", array("username" => $username));
-        if ($arr['password'] === $password) {
-          return true;
-        } else {
-          return false;
-        }
+        return ($GLOBALS['db']->query("SELECT `password` FROM user WHERE username = :username", array("username" => $username))['password'] === $password);
       }
     }
+
+    /*  Verify the email verification code of the account  */
+    public static function verifyVerificationCode($email, $verificationCode) {
+      if (self::existByEMail($email)) {
+        return ($GLOBALS['db']->query("SELECT `verificationCode` FROM user WHERE email = :email", array("email" => $email))['verificationCode'] === $verificationCode);
+      }
+    }
+
     /*  Get all users, for the dashboard  */
     public static function getAll() {
       $arr = $GLOBALS['db']->queryAll("SELECT id FROM `user`", array());
       $data = array();
       foreach ($arr as $row) {
         $data[] = self::getById($row['id'])->getInfos();
+      }
+      return $data;
+    }
+
+    public static function getAllRealnames() {
+      $arr = $GLOBALS['db']->queryAll("SELECT id, realname FROM `user`", array());
+      $data = array();
+      foreach ($arr as $row) {
+        $data[] = array("id" => $row['id'], "realname" => self::getById($row['id'])->getRealname());
       }
       return $data;
     }

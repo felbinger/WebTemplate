@@ -1,0 +1,228 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Messages</title>
+
+    <!--  jQuery  -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+    <!-- Bootstrap 4.0 -->
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js" integrity="sha384-feJI7QwhOS+hwpX2zkaeJQjeiwlhOP+SdQDqhgvvo1DsjtiSQByFdThsxO669S2D" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap Data Tables -->
+    <link rel="stylesheet" src="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Propper JS -->
+    <script src="https://unpkg.com/popper.js@1.14.1/dist/umd/popper.js"></script>
+
+    <!-- Scripts -->
+    <script src="/assets/js/sorttable.js"></script>
+    <script src="assets/js/restful.js"></script>
+    <script src="assets/js/sha512.js"></script>
+    <script src="assets/js/user.js"></script>
+    <script src="assets/js/log.js"></script>
+    <script src="assets/js/level.js"></script>
+    <script src="assets/js/status.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/message.js"></script>
+  </head>
+  <body>
+    <div id="nav"></div>
+		<script>
+		$.get("navigation.html", function(data){
+	    $("#nav").replaceWith(data);
+		});
+    </script>
+    <div class="card">
+      <div class="card-body">
+        <table id="viewMessageTable" class="table sortable table-bordered">
+          <thead>
+          	<tr>
+              <th>From</th>
+              <th>Subject</th>
+              <th>Created</th>
+              <th class="sorttable_nosort"></th>
+              <th class="sorttable_nosort"><a data-toggle="modal" href="#createMessageModal"><span class="fa fa-plus"/></a></th>
+          	</tr>
+          </thead>
+          <tbody id="messages">
+            <script>
+            function openMessage(id) {
+              Message.getById(id, function(obj) {
+                $("#showMessageModalFrom").attr("value", obj["from"]["realname"]);
+                $("#showMessageModalSubject").attr("value", obj["subject"]);
+                $("#showMessageModalMessage").html(obj["message"]);
+                $("#showMessageModal").modal('show');
+              });
+            }
+
+            function openModal_createMessage(id) {
+              $("#deleteMessageModalId").data("id", id);
+              $("#deleteMessageModalMsg").html('<div class="form-group"><div class="alert alert-info">Do you really want to delete the Message ?</div></div>');
+              $("#deleteMessageModal").modal('show');
+            }
+
+            function deleteMessage() {
+              var id = $('#deleteMessageModalId').data('id');
+              Message.delete(id, function(obj) {
+                if(!obj.hasOwnProperty('error')) {
+                  if (obj["successful"]) {
+                    location.reload();
+                  }
+                } else {
+                  if (obj["error"] === "id not found") {
+                    $("#deleteMessageModalError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
+                  } else {
+                    $("#deleteMessageModalError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
+                  }
+                }
+              });
+            }
+
+            function createMessage() {
+              var to = $("#createMessageModalTo").val();
+              var subject = $("#createMessageModalSubject").val();
+              var message = $("#createMessageModalMessage").val();
+              if (message === "" || subject === "") {
+                $("#createMessageModalError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Fill out all fields, please!</div>');
+              } else {
+                Message.create(to, subject, message, function(obj) {
+                  if(!obj.hasOwnProperty('error')) {
+                    if (obj["successful"]) {
+                      $("#createMessageModal").modal('hide');
+                      location.reload();
+                    }
+                  } else {
+                    $("#createMessageModalError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error, try again later!</div>');
+                  }
+                });
+              }
+            }
+
+            User.isTokenValid(function(response) {
+              if (response) {
+                Message.getAll(function (response) {
+                  if(!response.hasOwnProperty('error')) {
+                    for (var obj in response) {
+                      $('#messages').append("<tr>" +
+                                            "<td>" + response[obj]["from"]["realname"] + "</td>" +
+                                            "<td>" + response[obj]["subject"] + "</td>" +
+                                            "<td>" + timeConverter(response[obj]["created"]) + "</td>" +
+                                            "<td>" + '<a onclick="openMessage(' + response[obj]["id"] + ')"><span class="fa fa-info"/></a>' + "</td>" +
+                                            "<td>" + '<a onclick="openModal_createMessage(' + response[obj]["id"] + ')"><span class="fa fa-trash-o"/></a>' +"</td>" +
+                                            "</tr>");
+                    }
+                    $('#viewMessageTable').DataTable();
+                  }
+                });
+                User.getAllRealnames(function (response) {
+                  for (var obj in response) {
+                    $("#createMessageModalTo").append('<option value="' + response[obj]["id"] + '">' + response[obj]["realname"] + '</option>');
+                  }
+                });
+              } else {
+                window.location = host + "index.html";
+              }
+            });
+            </script>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Modal: Show Message -->
+    <div class="modal fade" id="showMessageModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Show Message</span></h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div id="showMessageModalError"></div>
+            <table cellspacing="1">
+              <tbody>
+                <tr>
+                  <td><p>From: </p></td>
+                  <td><input type="text" id="showMessageModalFrom" disabled/></td>
+                </tr>
+                <tr>
+                  <td><p>Subject: </p></td>
+                  <td><input type="text" id="showMessageModalSubject" disabled/></td>
+                </tr>
+                <tr>
+                  <td><p>Message: </p></td>
+                  <td><textarea rows="6" cols="40" id="showMessageModalMessage" disabled></textarea></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Create Message -->
+    <div class="modal fade" id="createMessageModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Create Message</span></h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div id="createMessageModalError"></div>
+            <table cellspacing="1">
+              <tbody>
+                <tr>
+                  <td><p>To: </p></td>
+                  <td><select id="createMessageModalTo"></select></td>
+                </tr>
+                <tr>
+                  <td><p>Subject: </p></td>
+                  <td><input type="text" id="createMessageModalSubject"/></td>
+                </tr>
+                <tr>
+                  <td><p>Message: </p></td>
+                  <td><textarea rows="6" cols="40" id="createMessageModalMessage"></textarea></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="createMessage()">Create</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Delete Message -->
+    <div class="modal fade" id="deleteMessageModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Delete Message</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div id="deleteMessageModalMsg"></div>
+            <div id="deleteMessageModalError"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="deleteMessageModalId" onclick="deleteMessage()">Delete</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

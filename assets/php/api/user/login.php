@@ -18,8 +18,10 @@
     if ($session->isValid()) {
       dieError("already logged in");
     }
-
     if(User::existByName($username)) {
+      if ($config["emailVerification"] && !User::getByName($username)->isEmailVerified()) {
+        dieError("email not verified");
+      }
       if (User::verifyPassword($username, $password)) {
         Log::create("Login", "successful", User::getByName($username));
         dieInfos(array("token" => Session::create(User::getByName($username))->getToken()));
@@ -28,7 +30,7 @@
         dieError("wrong credentials");
       }
     } else {
-      Log::create("Login", "wrong username", User::getByName($username)); //TODO: User does not exist, could cause an error on the database (foreignkey)
+      Log::create("Login", "wrong username", User::getByName($username));
       dieError("wrong credentials");
     }
   } else {

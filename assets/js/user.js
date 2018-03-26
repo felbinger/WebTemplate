@@ -98,6 +98,7 @@ var User = {
                                "<td>" + response[obj]["username"] + "</td>" +
                                "<td>" + response[obj]["realname"] + "</td>" +
                                "<td>" + response[obj]["email"] + "</td>" +
+                               "<td>" + ((response[obj]["emailVerified"]) ? "Yes" : "No") + "</td>" +
                                "<td>" + timeConverter(response[obj]["created"]) + "</td>" +
                                "<td>" + ((response[obj]["lastlogin"] === "0000-00-00 00:00:00" || response[obj]["lastlogin"] == null) ? "Never" : timeConverter(response[obj]["lastlogin"])) + "</td>" +
                                "<td>" + response[obj]["level"]["name"] + "</td>" +
@@ -140,7 +141,22 @@ var User = {
     updatePasswordById: function(id, password, callback) {
       requestWithToken("POST", host + "assets/php/api/user/updatePasswordById.php", "id=" + id + "&password=" + CryptoJS.SHA512(password), function(response) {
         callback(JSON.parse(response));
+      }, token);
+    },
 
+    /*  Get the realname of an user without administrator privileges */
+    /*  Used in Messages  */
+    getRealnameById: function(id, callback) {
+      requestWithToken("POST", host + "assets/php/api/user/getRealnameById.php", "id=" + id, function(response) {
+        callback(JSON.parse(response)["realname"]);
+      }, token);
+    },
+
+    /*  Get the realname from all users without administrator privileges - used to select how to which user the message should be send  */
+    /*  Used in Messages  */
+    getAllRealnames: function(callback) {
+      requestWithToken("POST", host + "assets/php/api/user/getAllRealnames.php", "", function(response) {
+        callback(JSON.parse(response));
       }, token);
     }
 };

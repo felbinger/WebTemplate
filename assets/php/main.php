@@ -37,6 +37,7 @@
   include_once $_SERVER['DOCUMENT_ROOT'] . '/assets/php/classes/log.php';
   include_once $_SERVER['DOCUMENT_ROOT'] . '/assets/php/classes/level.php';
   include_once $_SERVER['DOCUMENT_ROOT'] . '/assets/php/classes/status.php';
+  include_once $_SERVER['DOCUMENT_ROOT'] . '/assets/php/classes/message.php';
 
   /*  utilities   */
   function dieInfos($array) {
