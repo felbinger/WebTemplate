@@ -26,21 +26,21 @@
           if (!count($users) > 0) {
             Log::create("Delete Status", "successful", $session->getUser());
             Status::getById($id)->delete();
-            dieSuccessful();
+            dieCode(200);
           } else {
-            dieError(array("status is in use" => $users));
+            dieCode(907, $users));
           }
         } else {
           Log::create("Delete Status", "id " . $id . " not found", $session->getUser());
-          dieError("id not found");
+          dieCode(404);
         }
       } else {
         Log::create("Delete Status", "permission denied", $session->getUser());
-        dieError("permission denied");
+        dieCode(403);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

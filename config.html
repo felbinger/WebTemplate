@@ -125,13 +125,13 @@
         var name = $('#configCreateLevelName').val();
         if (name !== "") {
           Level.create(name, function(obj) {
-            if(!obj.hasOwnProperty('error')) {
+            if (obj["status"]["id"] == 200) {
               $('#configModalCreateLevel').modal('hide');
               location.reload();
-            } else if (obj["error"] === "levelname already exists") {
-              $("#configCreateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Level name already exists</div></div>');
+            } else if (obj["status"]["id"] == 901) {
+              $("#configCreateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Level Name is already in use</div></div>');
             } else {
-              $("#configCreateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error</div></div>');
+              $("#configCreateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error (' + obj["status"]["id"] + ')</div></div>');
             }
           });
         } else {
@@ -144,11 +144,11 @@
         var name = $('#configUpdateLevelName').val();
         if (name !== "") {
           Level.updateById(id, name, function(obj) {
-            if(!obj.hasOwnProperty('error')) {
+            if (obj["status"]["id"] == 200) {
               $('#configModalUpdateLevel').modal('hide');
               location.reload();
             } else {
-              $("#configUpdateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error</div></div>');
+              $("#configUpdateLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error (' + obj["status"]["id"] + ')</div></div>');
             }
           });
         } else {
@@ -159,22 +159,20 @@
       function deleteLevel() {
         var id = $('#save_modalDeleteLevel').data('id');
         Level.delete(id, function(obj) {
-          if(!obj.hasOwnProperty('error')) {
-            if (obj["successful"]) {
-              location.reload();
-            }
+          if (obj["status"]["id"] == 200) {
+            location.reload();
           } else {
-            if (obj["error"] === "permission denied") {
+            if (obj["status"]["id"] == 403) {
               window.location = "index.html";
-            } else if (obj["error"] === "id not found") {
+            } else if (obj["status"]["id"] == 404) {
               $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
-            } else if (obj["error"] === "this level is not deleteable") {
+            } else if (obj["status"]["id"] == 906) {
               $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> This level can not be deleted!</div></div>');
-            } else if (obj.error.hasOwnProperty("level is in use")) {
+            } else if (obj["status"]["id"] == 907) {
               $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> The Level is in use by the following Users:</div></div>');
               $("#configDeleteLevelError").append('<table class="table sortable table-bordered"><thead><tr><th>Username</th><th>E-Mail</th><th>Real Name</th></tr></thead><tbody id="configDeleteLevelErrorUsers"></tbody></table>');
-              for (var i in obj["error"]["level is in use"]) {
-                $("#configDeleteLevelErrorUsers").append('<tr><td>' + obj["error"]["level is in use"][i]["username"] + '</td><td>' + obj["error"]["level is in use"][i]["email"] + '</td><td>' + obj["error"]["level is in use"][i]["realname"] + '</td></tr>')
+              for (var i in obj["status"]["msg"]["in use"]) {
+                $("#configDeleteLevelErrorUsers").append('<tr><td>' + obj["status"]["msg"]["in use"][i]["username"] + '</td><td>' + obj["status"]["msg"]["in use"][i]["email"] + '</td><td>' + obj["status"]["msg"]["in use"][i]["realname"] + '</td></tr>')
               }
             } else {
               $("#configDeleteLevelError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
@@ -205,13 +203,13 @@
         var name = $('#configCreateStatusName').val();
         if (name !== "") {
           Status.create(name, function(obj) {
-            if(!obj.hasOwnProperty('error')) {
+            if (obj["status"]["id"] == 200) {
               $('#configModalCreateStatus').modal('hide');
               location.reload();
-            } else if (obj["error"] === "statusname already exists") {
+            } else if (obj["status"]["id"] == 901) {
               $("#configCreateStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Status name already exists</div></div>');
             } else {
-              $("#configCreateStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error</div></div>');
+              $("#configCreateStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error (' + obj["status"]["id"] + ')</div></div>');
             }
           });
         } else {
@@ -224,7 +222,7 @@
         var name = $('#configUpdateStatusName').val();
         if (name !== "") {
           Status.updateById(id, name, function(obj) {
-            if(!obj.hasOwnProperty('error')) {
+            if (obj["status"]["id"] == 200) {
               $('#configModalUpdateLevel').modal('hide');
               location.reload();
             } else {
@@ -239,20 +237,18 @@
       function deleteStatus() {
         var id = $('#save_modalDeleteStatus').data('id');
         Status.delete(id, function(obj) {
-          if(!obj.hasOwnProperty('error')) {
-            if (obj["successful"]) {
-              location.reload();
-            }
+          if(obj["status"]["id"] == 200) {
+            location.reload();
           } else {
-            if (obj["error"] === "permission denied") {
+            if (obj["status"]["id"] == 403) {
               window.location = "index.html";
-            } else if (obj["error"] === "id not found") {
+            } else if (obj["status"]["id"] == 404) {
               $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
-            } else if (obj.error.hasOwnProperty("status is in use")) {
+            } else if (obj["status"]["id"] == 907) {
               $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> The Status is in use by the following Users:</div></div>');
               $("#configDeleteStatusError").append('<table class="table sortable table-bordered"><thead><tr><th>Username</th><th>E-Mail</th><th>Real Name</th></tr></thead><tbody id="configDeleteStatusErrorUsers"></tbody></table>');
-              for (var i in obj["error"]["status is in use"]) {
-                $("#configDeleteStatusErrorUsers").append('<tr><td>' + obj["error"]["status is in use"][i]["username"] + '</td><td>' + obj["error"]["status is in use"][i]["email"] + '</td><td>' + obj["error"]["status is in use"][i]["realname"] + '</td></tr>')
+              for (var i in obj["status"]["msg"]["in use"]) {
+                $("#configDeleteStatusErrorUsers").append('<tr><td>' + obj["status"]["msg"]["in use"][i]["username"] + '</td><td>' + obj["status"]["msg"]["in use"][i]["email"] + '</td><td>' + obj["status"]["msg"]["in use"][i]["realname"] + '</td></tr>')
               }
             } else {
               $("#configDeleteStatusError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
@@ -273,7 +269,7 @@
             $("#configInputSessionValidity").val(validity);
           });
           Status.getAll(function (response) {
-            if(!response.hasOwnProperty('error')) {
+            if(!response.hasOwnProperty('status')) {
               for (var obj in response) {
                 $('#status').append("<tr>" +
                                    "<td>" + response[obj]["id"] + "</td>" +
@@ -286,7 +282,7 @@
             }
           });
           Level.getAll(function (response) {
-            if(!response.hasOwnProperty('error')) {
+            if(!response.hasOwnProperty('status')) {
               for (var obj in response) {
                 $('#levels').append("<tr>" +
                                    "<td>" + response[obj]["id"] + "</td>" +

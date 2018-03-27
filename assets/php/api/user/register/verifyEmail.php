@@ -12,15 +12,15 @@
       if (User::verifyVerificationCode($email, $verificationCode)) {
         User::getByEMail($email)->setEmailVerifiedTrue();
         Log::create("Email Verification", "successful", User::getByEMail($email));
-        dieSuccessful();
+        dieCode(200);
       } else {
         Log::create("Email Verification", "wrong verification code", User::getByEMail($email));
-        dieError("invalid data");
+        dieCode(902);
       }
     } else {
       Log::create("Email Verification", "wrong email", User::getByEMail($email));
-      dieError("invalid data");
+      dieCode(902);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

@@ -28,18 +28,18 @@
         if(!User::existByName($username)) {
           Log::create("Created User", "successful", $session->getUser());
           User::create($username, $realname, $email, $password, $level, $status);
-          dieSuccessful();
+          dieCode(200);
         } else {
           Log::create("Created User", "username " . $username . " already used", $session->getUser());
-          dieError("username already exists");
+          dieCode(901);
         }
       } else {
         Log::create("Created User", "permission denied", $session->getUser());
-        dieError("permission denied");
+        dieCode(403);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

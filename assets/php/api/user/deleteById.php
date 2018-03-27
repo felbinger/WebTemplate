@@ -18,18 +18,18 @@
         if (User::existById($id)) {
           Log::create("Delete User", "successful", $session->getUser());
           User::getById($id)->delete();
-          dieSuccessful();
+          dieCode(200);
         } else {
           Log::create("Delete User", "id " . $id . " not found", $session->getUser());
-          dieError("id not found");
+          dieCode(404);
         }
       } else {
         Log::create("Delete User", "permission denied", $session->getUser());
-        dieError("permission denied");
+        dieCode(403);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

@@ -71,18 +71,16 @@
           $("#dashboardCreateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Fill out all fields, please!</div>');
         } else {
           User.create(username, realname, email, password, level, status, function (obj) {
-            if(!obj.hasOwnProperty('error')) {
-              if (obj["successful"]) {
-                $("#dashboardUserCreate").modal('hide');
-                location.reload();
-              }
+            if(obj["status"]["id"] == 200) {
+              $("#dashboardUserCreate").modal('hide');
+              location.reload();
             } else {
-              if (obj["error"] === "permission denied") {
+              if (obj["status"]["id"] == 403) {
                 window.location = "index.html";
-              } else if (obj["error"] === "username already exists") {
+              } else if (obj["status"]["id"] == 901) {
                 $("#dashboardCreateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Username already in use!</div>');
               } else {
-                $("#dashboardCreateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error, try again later!</div>');
+                $("#dashboardCreateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error (' + obj["status"]["id"] + ')</div>');
               }
             }
           });
@@ -97,16 +95,14 @@
         var level = $("#dashboardUpdateAccountLevel").val();
         var status = $("#dashboardUpdateAccountStatus").val();
         User.updateById(id, realname, email, level, status, function (obj) {
-          if(!obj.hasOwnProperty('error')) {
-            if (obj["successful"]) {
-              $("#dashboardUpdateUser").modal('hide');
-              location.reload();
-            }
+          if(obj["status"]["id"] == 200) {
+            $("#dashboardUpdateUser").modal('hide');
+            location.reload();
           } else {
-            if (obj["error"] === "permission denied") {
+            if (obj["status"]["id"] == 403) {
               window.location = "index.html";
             } else {
-              $("#dashboardUpdateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error, try again later!</div>');
+              $("#dashboardUpdateUserError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error (' + obj["status"]["id"] + ')</div>');
             }
           }
         });
@@ -119,19 +115,17 @@
         var password2 = $("#dashboardUpdateAccountPasswordAgain").val();
         if (password === password2) {
           User.updatePasswordById(id, password, function (obj) {
-            if(!obj.hasOwnProperty('error')) {
-              if (obj["successful"]) {
-                //TODO @Marcel: change to css alert
-                alert("Password has been changed!");
-                $("#dashboardUpdateAccountPassword").val("");
-                $("#dashboardUpdateAccountPasswordAgain").val("");
-                $("#dashboardUpdatePassword").modal('hide');
-              }
+            if(obj["status"]["id"] == 200) {
+              //TODO @Marcel: change to css alert
+              alert("Password has been changed!");
+              $("#dashboardUpdateAccountPassword").val("");
+              $("#dashboardUpdateAccountPasswordAgain").val("");
+              $("#dashboardUpdatePassword").modal('hide');
             } else {
-              if (obj["error"] === "permission denied") {
+              if (obj["status"]["id"] == 403) {
                 window.location = "index.html";
               } else {
-                $("#dashboardUpdatePasswordError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error, try again later!</div>');
+                $("#dashboardUpdatePasswordError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error (' + obj["status"]["id"] + ')</div>');
               }
             }
           });
@@ -151,17 +145,15 @@
       function dashboardDeleteUser() {
         var id = $('#dashboardDeleteUserDelete').data('id');
         User.delete(id, function(obj) {
-          if(!obj.hasOwnProperty('error')) {
-            if (obj["successful"]) {
-              location.reload();
-            }
+          if(obj["status"]["id"] == 200) {
+            location.reload();
           } else {
-            if (obj["error"] === "permission denied") {
+            if (obj["status"]["id"] == 403) {
               window.location = "index.html";
-            } else if (obj["error"] === "id not found") {
+            } else if (obj["status"]["id"] == 404) {
               $("#dashboardDeleteUserError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
             } else {
-              $("#dashboardDeleteUserError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
+              $("#dashboardDeleteUserError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error (' + obj["status"]["id"] + ')</div></div>');
             }
           }
         });

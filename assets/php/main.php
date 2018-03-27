@@ -43,9 +43,43 @@
   function dieInfos($array) {
     die(json_encode($array));
   }
-  function dieSuccessful() {
-    die(json_encode(array("successful" => true)));
-  }
-  function dieError($error) {
-    die(json_encode(array("error" => $error)));
+  function dieCode($code, $arr = array()) {
+    switch($code) {
+      case 200:
+        die(json_encode(array("status" => array("id" => 200, "msg" => "Ok"))));
+        break;
+      case 301:
+        die(json_encode(array("status" => array("id" => 301, "msg" => "Unauthorized"))));
+        break;
+      case 400:
+        die(json_encode(array("status" => array("id" => 400, "msg" => "Bad Request"))));
+        break;
+      case 403:
+        die(json_encode(array("status" => array("id" => 403, "msg" => "Forbidden"))));
+        break;
+      case 404:
+        die(json_encode(array("status" => array("id" => 404, "msg" => "Not Found"))));
+        break;
+      case 901:
+        die(json_encode(array("status" => array("id" => 901, "msg" => "Already in use"))));
+        break;
+      case 902:
+        die(json_encode(array("status" => array("id" => 902, "msg" => "Invalid Data"))));
+        break;
+      case 903:
+        die(json_encode(array("status" => array("id" => 903, "msg" => "E-Mail not verified"))));
+        break;
+      case 904:
+        die(json_encode(array("status" => array("id" => 904, "msg" => "Already logged in"))));
+        break;
+      case 905:
+        die(json_encode(array("status" => array("id" => 905, "msg" => "Disabled"))));
+        break;
+      case 906:
+        die(json_encode(array("status" => array("id" => 906, "msg" => "Not deleteable"))));
+        break;
+      case 907:
+        die(json_encode(array("status" => array("id" => 907, "msg" => array("in use" => $arr)))));
+        break;
+    }
   }

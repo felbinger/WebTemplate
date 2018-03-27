@@ -11,5 +11,5 @@
   if($session->isValid()) {
     dieInfos(User::getAllRealnames());
   } else {
-    dieError('invalid session');
+    dieCode(301);
   }

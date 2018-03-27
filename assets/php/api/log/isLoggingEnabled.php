@@ -12,8 +12,8 @@
     if($session->getUser()->isAdmin()) {
       dieInfos(array("enabled" => $GLOBALS['config']['logging']));
     } else {
-      dieError('permission denied');
+      dieCode(403);
     }
   } else {
-    dieError('invalid session');
+    dieCode(301);
   }

@@ -72,15 +72,13 @@
             function deleteMessage() {
               var id = $('#deleteMessageModalId').data('id');
               Message.delete(id, function(obj) {
-                if(!obj.hasOwnProperty('error')) {
-                  if (obj["successful"]) {
+                if (obj["status"]["id"] == 200) {
                     location.reload();
-                  }
                 } else {
-                  if (obj["error"] === "id not found") {
+                  if (obj["status"]["id"] == 404) {
                     $("#deleteMessageModalError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> ID not found</div></div>');
                   } else {
-                    $("#deleteMessageModalError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error, please try again later!</div></div>');
+                    $("#deleteMessageModalError").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error (' + obj["status"]["id"] + ')</div></div>');
                   }
                 }
               });
@@ -94,13 +92,15 @@
                 $("#createMessageModalError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Fill out all fields, please!</div>');
               } else {
                 Message.create(to, subject, message, function(obj) {
-                  if(!obj.hasOwnProperty('error')) {
-                    if (obj["successful"]) {
+                  if (obj["status"]["id"] == 200) {
+                      location.reload();
+                  } else {
+                    if (obj["status"]["id"] == 404) {
                       $("#createMessageModal").modal('hide');
                       location.reload();
                     }
                   } else {
-                    $("#createMessageModalError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error, try again later!</div>');
+                    $("#createMessageModalError").html('<div class="form-group alert alert-danger"><span class="fa fa-info-circle"></span> Internel error (' + obj["status"]["id"] + ')</div>');
                   }
                 });
               }
@@ -109,7 +109,7 @@
             User.isTokenValid(function(response) {
               if (response) {
                 Message.getAll(function (response) {
-                  if(!response.hasOwnProperty('error')) {
+                  if(!response.hasOwnProperty('status')) {
                     for (var obj in response) {
                       $('#messages').append("<tr>" +
                                             "<td>" + response[obj]["from"]["realname"] + "</td>" +

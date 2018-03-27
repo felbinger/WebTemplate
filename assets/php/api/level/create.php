@@ -18,18 +18,18 @@
         if(!Level::existByName($name)) {
           Log::create("Create Level", "successful", $session->getUser());
           Level::create($name);
-          dieSuccessful();
+          dieCode(200);
         } else {
           Log::create("Create Level", "name " . $name . " already in use", $session->getUser());
-          dieError("levelname already exists");
+          dieCode(901);
         }
       } else {
         Log::create("Create Level", "permission denied", $session->getUser());
-        dieError("permission denied");
+        dieCode(403);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

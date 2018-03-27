@@ -16,13 +16,13 @@
     if ($session->isValid()) {
       if($session->getUser()->isAdmin()) {
         $db->update('UPDATE config SET value = :value WHERE name = "sessionValidity"', array("value" => $sessionValidity));
-        dieSuccessful();
+        dieCode(200);
       } else {
-        dieError("permission denied");
+        dieCode(403);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

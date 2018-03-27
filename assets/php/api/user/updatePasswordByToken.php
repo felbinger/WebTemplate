@@ -18,14 +18,14 @@
       if (User::existById($session->getUser()->getId())) {
         Log::create("Password Update", "successful", $session->getUser());
         $session->getUser()->updatePassword($password);
-        dieSuccessful();
+        dieCode(200);
       } else {
         Log::create("Password Update", "id " . $session->getUser()->getId() . " not found", $session->getUser());
-        dieError("id not found");
+        dieCode(404);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

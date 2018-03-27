@@ -11,5 +11,5 @@
   if($session->isValid()) {
       dieInfos(array("admin" => ($session->getUser()->isAdmin())));
   } else {
-    dieError('invalid session');
+    dieCode(301);
   }

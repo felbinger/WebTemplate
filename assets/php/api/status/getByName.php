@@ -16,11 +16,11 @@
       if(Status::existByName($name)) {
         dieInfos(Status::getByName($name)->getInfos());
       } else {
-        dieError("name not found");
+        dieCode(404);
       }
     } else {
-      dieError('invalid session');
+      dieCode(301);
     }
   } else {
-    dieError('invalid request');
+    dieCode(400);
   }

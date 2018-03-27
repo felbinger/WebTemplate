@@ -17,7 +17,7 @@
       if($session->getUser()->isAdmin()) {
         if (Level::existById($id)) {
           if ($id == 0 || $id == 1) {
-            dieError("this level is not deleteable");
+            dieCode(906);
           } else {
             //Check if any user has this level
             $users = array();
@@ -29,22 +29,22 @@
             if (!count($users) > 0) {
               Log::create("Delete Level", "successful", $session->getUser());
               Level::getById($id)->delete();
-              dieSuccessful();
+              dieCode(200);
             } else {
-              dieError(array("level is in use" => $users));
+              dieCode(907, $users);
             }
           }
         } else {
           Log::create("Delete Level", "id " . $id . " not found", $session->getUser());
-          dieError("id not found");
+          dieCode(404);
         }
       } else {
         Log::create("Delete Level", "permission denied", $session->getUser());
-        dieError("permission denied");
+        dieCode(403);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

@@ -17,10 +17,10 @@
     $message = htmlspecialchars(strip_tags(trim($_POST['message'])));
     if ($session->isValid()) {
       Message::create($session->getUser(), User::getById($userid), $subject, $message);
-      dieSuccessful();
+      dieCode(200);
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

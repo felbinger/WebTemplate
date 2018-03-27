@@ -11,5 +11,5 @@
   if($session->isValid()) {
       dieInfos($session->getUser()->getInfos());
   } else {
-    dieError('invalid session');
+    dieCode(301);
   }

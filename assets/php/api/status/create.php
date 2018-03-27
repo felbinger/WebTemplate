@@ -18,18 +18,18 @@
         if(!Level::existByName($name)) {
           Log::create("Create Status", "successful", $session->getUser());
           Status::create($name);
-          dieSuccessful();
+          dieCode(200);
         } else {
           Log::create("Create Status", "name " . $name . " already in use", $session->getUser());
-          dieError("statusname already exists");
+          dieCode(901);
         }
       } else {
         Log::create("Create Status", "permission denied", $session->getUser());
-        dieError("permission denied");
+        dieCode(403);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

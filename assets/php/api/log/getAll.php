@@ -12,8 +12,8 @@
     if($session->getUser()->isAdmin()) {
       dieInfos(Log::getAll());
     } else {
-      dieError('permission denied');
+      dieCode(403);
     }
   } else {
-    dieError('invalid session');
+    dieCode(301);
   }

@@ -4,12 +4,12 @@ var User = {
     login: function(username, password) {
       request("POST", host + "assets/php/api/user/login.php", "username=" + username + "&password=" + CryptoJS.SHA512(password), function(response) {
         response = JSON.parse(response);
-        if(!response.hasOwnProperty('error')) {
+        if(!response.hasOwnProperty('status')) {
           setCookie('token', response['token'], 2);
           token = getCookie('token');
           window.location = "index.html";
         } else {
-          $("#login_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span>' + ((response["error"] == "wrong credentials") ? " Wrong Credentials" : "Internal Error, try again later!") + '</div></div>');
+          $("#login_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span>' + ((response["status"]["id"] == 902) ? " Wrong Credentials" : "Internal Error (" + response["status"]["id"] + ")") + '</div></div>');
         }
       });
     },
@@ -43,14 +43,14 @@ var User = {
 
     /*  Register a new user, used in register.html  */
     register: function(username, realname, email, password) {
-      request("POST", host + "assets/php/api/user/register/register.php", "username=" + username + "realname=" + realname + "email=" + email +  "&password=" + CryptoJS.SHA512(password), function(response) {
+      request("POST", host + "assets/php/api/user/register/register.php", "username=" + username + "&realname=" + realname + "&email=" + email +  "&password=" + CryptoJS.SHA512(password), function(response) {
         response = JSON.parse(response);
-        if(!response.hasOwnProperty('error')) {
+        if(response["status"]["id"]) {
           window.location = "login.html";
-        } else if (response["error"] === "registration is disabled") {
-          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span>Registration is disabled!</div></div>');
+        } else if (response["status"]["id"] == 905) {
+          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Registration is disabled!</div></div>');
         } else {
-          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span>Internal Error, try again later!</div></div>');
+          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error (' + response["status"]["id"] +')</div></div>');
         }
       }, token);
     },
@@ -92,7 +92,7 @@ var User = {
     getAll: function() {
       requestWithToken("POST", host + "assets/php/api/user/getAll.php", "", function(response) {
         response = JSON.parse(response);
-        if(!response.hasOwnProperty('error')) {
+        if(!response.hasOwnProperty('status')) {
           for (var obj in response) {
             $('#users').append("<tr>" +
                                "<td>" + response[obj]["username"] + "</td>" +

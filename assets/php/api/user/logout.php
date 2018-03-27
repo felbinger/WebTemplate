@@ -12,7 +12,7 @@
   if ($session->isValid()) {
     Log::create("Logout", "successful", $session->getUser());
     $session->breakSession();
-    dieSuccessful();
+    dieCode(200);
   } else {
-    dieError("invalid session");
+    dieCode(301);
   }

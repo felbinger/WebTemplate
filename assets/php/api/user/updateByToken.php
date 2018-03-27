@@ -19,14 +19,14 @@
       if(User::existById($session->getUser()->getId())) {
         Log::create("Update", "successful", $session->getUser());
         User::getById($session->getUser()->getId())->update($realname, $email, $session->getUser()->getLevel()->getId(), $session->getUser()->getStatus()->getId());
-        dieSuccessful();
+        dieCode(200);
       } else {
         Log::create("Update", "id " . $session->getUser()->getId() . " not found", $session->getUser());
-        dieError('id not found');
+        dieCode(404);
       }
     } else {
-      dieError('invalid session');
+      dieCode(301);
     }
   } else {
-    dieError('invalid request');
+    dieCode(400);
   }

@@ -22,18 +22,18 @@
         if(User::existById($id)) {
           Log::create("Admin Password Update", "successful", $session->getUser());
           User::getById($id)->updatePassword($password);
-          dieSuccessful();
+          dieCode(200);
         } else {
           Log::create("Admin Password Update", "id " . $id . " not found", $session->getUser());
-          dieError('id not found');
+          dieCode(404);
         }
       } else {
         Log::create("Admin Password Update", "permission denied", $session->getUser());
-        dieError('permission denied');
+        dieCode(403);
       }
     } else {
-      dieError('invalid request');
+      dieCode(400);
     }
   } else {
-    dieError('invalid session');
+    dieCode(301);
   }

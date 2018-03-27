@@ -16,11 +16,11 @@
       if(Status::existById($id)) {
         dieInfos(Status::getById($id)->getInfos());
       } else {
-        dieError("id not found");
+        dieCode(404);
       }
     } else {
-      dieError('invalid session');
+      dieCode(301);
     }
   } else {
-    dieError('invalid request');
+    dieCode(400);
   }

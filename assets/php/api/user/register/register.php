@@ -22,13 +22,13 @@
 			    //$smtp = Mail::factory('smtp', array ('host' => "ssl://strato.de", 'port' => "465", 'auth' => true, 'username' => "smtp_username", 'password' => "smtp_password"));
 		  	  //$mail = $smtp->send($user->getEmail(), array ('From' => "noreply@example.de", 'To' => $user->getEmail(), 'Subject' => "WebTemplate Mail Verification"), $message);
         }
-        dieSuccessful();
+        dieCode(200);
       } else {
-        dieError("username already exists");
+        dieCode(901);
       }
     } else {
-      dieError("registration is disabled");
+      dieCode(905);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

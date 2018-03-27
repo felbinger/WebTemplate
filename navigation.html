@@ -26,7 +26,7 @@
         '</div>' +
       '</li>');
       Message.getAll(function (response) {
-        if(!response.hasOwnProperty('error')) {
+        if(!response.hasOwnProperty('status')) {
           for (var obj in response) {
             $('#navbarMessageDropdown').append('<li><div><strong>' + response[obj]["subject"] + '</strong><span class="pull-right text-muted"><em>' + response[obj]["from"] +
                                                '</em></span></div><div>' + response[obj]["message"] + '</div></li>' +

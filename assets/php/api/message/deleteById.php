@@ -18,18 +18,18 @@
         if (Message::getById($id)->getTo() == $session->getUser()->getId()) {
           //CHECK IF the userid is in the fromid
           Message::getById($id)->delete();
-          dieSuccessful();
+          dieCode(200);
         } else {
           Log::create("Delete Message", "tried to delete a message from another user", $session->getUser());
-          dieError("you can only delete your own messages");
+          dieCode(403);
         }
       } else {
         Log::create("Delete Message", "id " . $id . " not found", $session->getUser());
-        dieError("id not found");
+        dieCode(404);
       }
     } else {
-      dieError("invalid session");
+      dieCode(301);
     }
   } else {
-    dieError("invalid request");
+    dieCode(400);
   }

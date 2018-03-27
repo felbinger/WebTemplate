@@ -17,14 +17,14 @@
         if(User::existById($id)) {
           dieInfos(User::getById($id)->getInfos());
         } else {
-          dieError("id not found");
+          dieCode(404);
         }
       } else {
-        dieError("permission denied");
+        dieCode(403);
       }
     } else {
-      dieError('invalid session');
+      dieCode(301);
     }
   } else {
-    dieError('invalid request');
+    dieCode(400);
   }

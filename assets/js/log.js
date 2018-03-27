@@ -15,7 +15,7 @@ var Log = {
   getAll: function() {
     requestWithToken("POST", host + "assets/php/api/log/getAll.php", "", function(response) {
       response = JSON.parse(response);
-      if(!response.hasOwnProperty('error')) {
+      if(!response.hasOwnProperty('status')) {
         for (var obj in response) {
           $('#logs').append("<tr>" +
                             "<td>" + response[obj]["id"] + "</td>" +
