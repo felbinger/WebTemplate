@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- Propper JS -->
-    <script src="https://unpkg.com/popper.js@1.14.1/dist/umd/popper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.1/popper.min.js"></script>
 
 		<!-- Scripts -->
 		<script src="assets/js/restful.js"></script>
@@ -71,10 +71,23 @@
 						<hr />
 					</div>
 					<div class="form-group">
-						<button class="btn btn-block btn-primary" onclick="User.login($('#login_username').val(), $('#login_password').val())">Login</button>
+						<button class="btn btn-block btn-primary" onclick="login($('#login_username').val(), $('#login_password').val())">Login</button>
 					</div>
 				</div>
 			</div>
 		</div>
+		<script>
+			function login(username, password) {
+				User.login(username, realname, function (obj) {
+					if(!obj.hasOwnProperty('status')) {
+	          setCookie('token', obj['token'], 2);
+	          token = getCookie('token');
+	          window.location = "index.html";
+	        } else {
+	          $("#login_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span>' + ((obj["status"]["id"] == 902) ? " Wrong Credentials" : "Internal Error (" + obj["status"]["id"] + ")") + '</div></div>');
+	        }
+				});
+			}
+		</script>
 	</body>
 </html>

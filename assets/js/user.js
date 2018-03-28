@@ -1,16 +1,9 @@
 var token = getCookie('token');
 
 var User = {
-    login: function(username, password) {
+    login: function(username, password, callback) {
       request("POST", host + "assets/php/api/user/login.php", "username=" + username + "&password=" + CryptoJS.SHA512(password), function(response) {
-        response = JSON.parse(response);
-        if(!response.hasOwnProperty('status')) {
-          setCookie('token', response['token'], 2);
-          token = getCookie('token');
-          window.location = "index.html";
-        } else {
-          $("#login_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span>' + ((response["status"]["id"] == 902) ? " Wrong Credentials" : "Internal Error (" + response["status"]["id"] + ")") + '</div></div>');
-        }
+        callback(JSON.parse(response));
       });
     },
 
@@ -42,16 +35,9 @@ var User = {
     },
 
     /*  Register a new user, used in register.html  */
-    register: function(username, realname, email, password) {
+    register: function(username, realname, email, password, callback) {
       request("POST", host + "assets/php/api/user/register/register.php", "username=" + username + "&realname=" + realname + "&email=" + email +  "&password=" + CryptoJS.SHA512(password), function(response) {
-        response = JSON.parse(response);
-        if(response["status"]["id"]) {
-          window.location = "login.html";
-        } else if (response["status"]["id"] == 905) {
-          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Registration is disabled!</div></div>');
-        } else {
-          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error (' + response["status"]["id"] +')</div></div>');
-        }
+        callback(JSON.parse(response));
       }, token);
     },
 
@@ -89,26 +75,9 @@ var User = {
 
     /*  Get all users and append them to the dashboard table  */
     /*  Used in: Dashboard  */
-    getAll: function() {
+    getAll: function(callback) {
       requestWithToken("POST", host + "assets/php/api/user/getAll.php", "", function(response) {
-        response = JSON.parse(response);
-        if(!response.hasOwnProperty('status')) {
-          for (var obj in response) {
-            $('#users').append("<tr>" +
-                               "<td>" + response[obj]["username"] + "</td>" +
-                               "<td>" + response[obj]["realname"] + "</td>" +
-                               "<td>" + response[obj]["email"] + "</td>" +
-                               "<td>" + ((response[obj]["emailVerified"]) ? "Yes" : "No") + "</td>" +
-                               "<td>" + timeConverter(response[obj]["created"]) + "</td>" +
-                               "<td>" + ((response[obj]["lastlogin"] === "0000-00-00 00:00:00" || response[obj]["lastlogin"] == null) ? "Never" : timeConverter(response[obj]["lastlogin"])) + "</td>" +
-                               "<td>" + response[obj]["level"]["name"] + "</td>" +
-                               "<td>" + response[obj]["status"]["name"] + "</td>" +
-                               "<td>" + '<a onclick="dashboardOpenModalUpdate(' + response[obj]["id"] + ')"><span class="fa fa-gear"/></a>' + "</td>" +
-                               "<td>" + '<a onclick="dashboardUserDeleteFunction(' + response[obj]["id"] + ')"><span class="fa fa-trash-o"/></a>' +"</td>" +
-                               "</tr>");
-          }
-          $('#viewUserTable').DataTable();
-        }
+        callback(JSON.parse(response));
       }, token);
     },
 

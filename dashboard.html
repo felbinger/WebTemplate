@@ -17,7 +17,7 @@
     <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
 
     <!-- Propper JS -->
-    <script src="https://unpkg.com/popper.js@1.14.1/dist/umd/popper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.1/popper.min.js"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -161,7 +161,25 @@
 
       User.isTokenValid(function(response) {
         if (response) {
-          User.getAll();
+          User.getAll(function (response) {
+            if(!response.hasOwnProperty('status')) {
+              for (var obj in response) {
+                $('#users').append("<tr>" +
+                                   "<td>" + response[obj]["username"] + "</td>" +
+                                   "<td>" + response[obj]["realname"] + "</td>" +
+                                   "<td>" + response[obj]["email"] + "</td>" +
+                                   "<td>" + ((response[obj]["emailVerified"]) ? "Yes" : "No") + "</td>" +
+                                   "<td>" + timeConverter(response[obj]["created"]) + "</td>" +
+                                   "<td>" + ((response[obj]["lastlogin"] === "0000-00-00 00:00:00" || response[obj]["lastlogin"] == null) ? "Never" : timeConverter(response[obj]["lastlogin"])) + "</td>" +
+                                   "<td>" + response[obj]["level"]["name"] + "</td>" +
+                                   "<td>" + response[obj]["status"]["name"] + "</td>" +
+                                   "<td>" + '<a onclick="dashboardOpenModalUpdate(' + response[obj]["id"] + ')"><span class="fa fa-gear"/></a>' + "</td>" +
+                                   "<td>" + '<a onclick="dashboardUserDeleteFunction(' + response[obj]["id"] + ')"><span class="fa fa-trash-o"/></a>' +"</td>" +
+                                   "</tr>");
+              }
+              $('#viewUserTable').DataTable();
+            }
+          });
           Status.getAll(function (response) {
             for (var obj in response) {
               $("#dashboardCreateAccountStatus").append('<option value="' + response[obj]["id"] + '">' + response[obj]["name"] + '</option>');

@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- Propper JS -->
-    <script src="https://unpkg.com/popper.js@1.14.1/dist/umd/popper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.1/popper.min.js"></script>
 
 		<!-- Scripts -->
 		<script src="assets/js/restful.js"></script>
@@ -69,12 +69,26 @@
 						<hr />
 					</div>
 					<div class="form-group">
-						<button class="btn btn-block btn-primary" onclick="User.register($('#register_username').val(), $('#register_realname').val(), $('#register_email').val(), $('#register_password').val())">Register</button>
+						<button class="btn btn-block btn-primary" onclick="register($('#register_username').val(), $('#register_realname').val(), $('#register_email').val(), $('#register_password').val())">Register</button>
 					</div>
 				</div>
 			</div>
 		</div>
 		<script>
+			function register(username, realname, email, password) {
+				User.register(username, realname, email, password, function(response) {
+					if(response["status"]["id"]) {
+	          window.location = "login.html";
+	        } else if (response["status"]["id"] == 905) {
+	          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Registration is disabled!</div></div>');
+	        } else if (response["status"]["id"] == 901) {
+	          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Username already in use!</div></div>');
+	        } else {
+	          $("#register_error").html('<div class="form-group"><div class="alert alert-danger"><span class="fa fa-info-circle"></span> Internal Error (' + response["status"]["id"] +')</div></div>');
+	        }
+				});
+			}
+
 			User.isRegistrationEnabled(function (obj) {
 				if (!obj) {
 					window.location = "index.html";

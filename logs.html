@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- Propper JS -->
-    <script src="https://unpkg.com/popper.js@1.14.1/dist/umd/popper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.1/popper.min.js"></script>
 
     <!-- Scripts -->
     <script src="/assets/js/sorttable.js"></script>
@@ -56,7 +56,22 @@
         <script>
           Log.isLoggingEnabled(function(response) {
             if (response) {
-              Log.getAll();
+              Log.getAll(function(response) {
+                if(!response.hasOwnProperty('status')) {
+                  for (var obj in response) {
+                    $('#logs').append("<tr>" +
+                                      "<td>" + response[obj]["id"] + "</td>" +
+                                      "<td>" + response[obj]["ip"] + "</td>" +
+                                      "<td>" + response[obj]["userAgent"] + "</td>" +
+                                      "<td>" + response[obj]["api"] + "</td>" +
+                                      "<td>" + response[obj]["status"] + "</td>" +
+                                      "<td>" + response[obj]["user"]["username"] + "</td>" +
+                                      "<td>" + timeConverter(response[obj]["timestamp"]) + "</td>" +
+                                      "</tr>");
+                  }
+                  $('#viewLogTable').DataTable();
+                }
+              });
             } else {
               window.location = host + "index.html";
             }
