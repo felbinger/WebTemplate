@@ -19,12 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-All used javascript library's and frameworks are available under the [MIT (x11) license](https://en.wikipedia.org/wiki/MIT_License)
-- [Bootstrap 4](https://getbootstrap.com/docs/4.0/about/license/)
-- [Font-Awesome](https://fontawesome.com/license)
-- [Propper.js](https://github.com/FezVrasta/popper.js/blob/master/LICENSE.md)
-- [jQuery](https://jquery.org/license/)
-- [DataTables](https://datatables.net/license/mit)
-- [sorttable](https://kryogenix.org/code/browser/licence.html)
-- [crypto-js](https://raw.githubusercontent.com/brix/crypto-js/develop/LICENSE)
